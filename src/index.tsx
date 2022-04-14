@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import GlobalStyle from './GlobalStyle';
 import store from './store';
-import Container from './components/Container';
 
 import Header from './Header';
 import Tournaments from './tournaments';

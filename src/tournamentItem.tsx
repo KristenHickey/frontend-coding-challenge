@@ -2,20 +2,17 @@ import React from 'react';
 import H6 from './components/H6';
 import Button from './components/Button';
 import './styles.css';
+import { ITournament, IState } from './interfaces';
+import { editTournament, deleteTournament } from './reducers/tournaments';
+import { useDispatch, useSelector } from 'react-redux';
 
-function TournamentItems() {
-  const tourn = {
-    name: 'test',
-    organizser: 'John Smith',
-    game: 'Rocket League',
-    participants: {
-      current: 3,
-      max: 250
-    },
-    start: '2020-02-27T11:28:02.233Z'
-  };
+type TournamentItemsProps = {
+  tournament: ITournament;
+};
 
-  const date = new Date(tourn.start).toLocaleDateString('en-gb', {
+const TournamentItems: React.FC<TournamentItemsProps> = ({ tournament }) => {
+  const dispatch = useDispatch();
+  const date = new Date(tournament.startDate).toLocaleDateString('en-gb', {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
@@ -23,19 +20,46 @@ function TournamentItems() {
     minute: 'numeric',
     second: 'numeric'
   });
+
+  function handleEdit(): void {
+    const tournamentName = prompt('New Tournament Name:');
+    if (tournamentName) {
+      const updateTournamentName = editTournament(
+        tournamentName,
+        tournament.id
+      );
+      dispatch(updateTournamentName);
+    }
+  }
+
+  function handleDelete(): void {
+    const confirmDelete = window.confirm(
+      'Do you really want to delete this tournament?'
+    );
+    if (confirmDelete) {
+      const deleteTournamentFunction = deleteTournament(tournament.id);
+      dispatch(deleteTournamentFunction);
+    }
+  }
+
   return (
     <div className="tournamentItem">
-      <H6>{tourn.name}</H6>
-      <p>Organizser: {tourn.organizser}</p>
-      <p>Game: {tourn.game}</p>
+      <H6>{tournament.name}</H6>
+      <p>Organizser: {tournament.organizer}</p>
+      <p>Game: {tournament.game}</p>
       <p>
-        Participants: {tourn.participants.current} / {tourn.participants.max}
+        Participants: {tournament.participants.current} /{' '}
+        {tournament.participants.max}
       </p>
       <p>Start: {date}</p>
-      <Button className="editButton">EDIT</Button>
-      <Button className="deleteButton">DELETE</Button>
+      <Button className="editButton" onClick={handleEdit}>
+        EDIT
+      </Button>
+      <Button className="deleteButton" onClick={handleDelete}>
+        DELETE
+      </Button>
     </div>
   );
-}
+};
 
 export default TournamentItems;
