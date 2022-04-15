@@ -31,26 +31,23 @@ function Tournaments() {
     setSearchInput(event.target.value);
   };
 
-  // const searchList: ITournament[] =
-  //   filteredProfiles &&
-  //   filteredProfiles.filter((profile) => {
-  //     return (
-  //       (profile.name.toLowerCase().includes(searchInput.toLocaleLowerCase()) ||
-  //         profile.surname.toLowerCase().includes(searchInput.toLowerCase())) &&
-  //       existingFriendsArray &&
-  //       !existingFriendsArray.includes(profile.userId)
-  //     );
-  //   });
   const selectTournaments = (state: IState) => state.tournaments;
   const tournaments = useSelector(selectTournaments);
-  const tournamentItems = tournaments.map(tournament => {
+
+  const searchList: ITournament[] =
+    tournaments &&
+    tournaments.filter(tournament =>
+      tournament.name.toLowerCase().includes(searchInput.toLocaleLowerCase())
+    );
+
+  const tournamentItems = searchList.map(tournament => {
     return <TournamentItems key={tournament.id} tournament={tournament} />;
   });
 
   return (
     <Container>
       <div className="input-search">
-        <Input placeholder="Search tournament..." />
+        <Input placeholder="Search tournament..." onChange={setSearchValue} />
         <Button onClick={handleClick}>CREATE TOURNAMENT</Button>
       </div>
       <div className="tournament-grid">{tournamentItems}</div>
