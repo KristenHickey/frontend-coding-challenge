@@ -1,32 +1,65 @@
+import { Dispatch } from 'redux';
+import {
+  deleteTournamentAction,
+  editTournamentAction,
+  errorAction,
+  fetchTournamentAction,
+  postTournamentAction
+} from '../actions/tournaments';
 import { API_TOURNAMENTS_URL } from '../constants/api';
-import { ITournament, IAction } from '../interfaces';
+import { ITournamentState, IAction } from '../interfaces';
 
-const initialState: ITournament[] = [];
+const initialState: ITournamentState = { data: [], error: false };
 
 export default function tournaments(
-  state: ITournament[] = initialState,
+  state: ITournamentState = initialState,
   action: IAction
 ) {
   switch (action.type) {
     case 'tournaments/getTournaments': {
-      return action.payload;
+      return {
+        ...state,
+        data: action.payload,
+        error: false
+      };
     }
     case 'tournaments/postTournament': {
-      return [action.payload, ...state];
+      return {
+        ...state,
+        data: [action.payload, ...state.data],
+        error: false
+      };
     }
 
     case 'tournaments/editTournament': {
-      return state.map(tournament => {
-        if (tournament.id !== action.payload.id) {
-          return tournament;
-        } else {
-          return action.payload.response;
-        }
-      });
+      return {
+        ...state,
+        data: state.data.map(tournament => {
+          if (tournament.id !== action.payload.id) {
+            return tournament;
+          } else {
+            return action.payload.response;
+          }
+        }),
+        error: false
+      };
     }
 
     case 'tournaments/deleteTournament': {
-      return state.filter(tournament => tournament.id !== action.payload.id);
+      return {
+        ...state,
+        data: state.data.filter(
+          tournament => tournament.id !== action.payload.id
+        ),
+        error: false
+      };
+    }
+
+    case 'tournaments/error': {
+      return {
+        ...state,
+        error: true
+      };
     }
 
     default:
@@ -34,55 +67,59 @@ export default function tournaments(
   }
 }
 
-const fetchRequest = (endPoint?: string, options?: any) => {
-  return fetch('http://localhost:4000/tournaments' + '/' + endPoint, options)
+const fetchRequest = (endPoint: string, options?: any) => {
+  return fetch(API_TOURNAMENTS_URL + endPoint, options)
     .then(res => (res.status < 400 ? res : Promise.reject()))
-    .then(res => (res.status !== 204 ? res.json() : res))
-    .catch(err => console.log('Error: ', err));
+    .then(res => (res.status !== 204 ? res.json() : res));
 };
 
-export async function fetchTournaments(dispatch: any, getState: any) {
-  const response = await fetchRequest('');
-  dispatch({ type: 'tournaments/getTournaments', payload: response });
+export async function fetchTournaments(dispatch: Dispatch) {
+  try {
+    const response = await fetchRequest('');
+    dispatch(fetchTournamentAction(response));
+  } catch (error) {
+    dispatch(errorAction);
+  }
+}
+
+export function searchTournaments(query: string) {
+  return async function searchTournamentsThunk(dispatch: Dispatch) {
+    try {
+      const response = await fetchRequest(`/?q=${query}`);
+      dispatch(fetchTournamentAction(response));
+    } catch (error) {
+      dispatch(errorAction);
+    }
+  };
 }
 
 export function postTournament(text: string) {
-  return async function postTournamentThunk(dispatch: any, getState: any) {
-    console.log(text);
+  return async function postTournamentThunk(dispatch: Dispatch, getState: any) {
     const response = await fetchRequest('', {
       method: 'POST',
       headers: { 'content-Type': 'application/json' },
       body: JSON.stringify({ name: text })
     });
-    dispatch({ type: 'tournaments/postTournament', payload: response });
+    dispatch(postTournamentAction(response));
   };
 }
 
 export function editTournament(text: string, id: string) {
-  return async function editTournamentThunk(dispatch: any, getState: any) {
-    console.log(text);
-    const response = await fetchRequest(id, {
+  return async function editTournamentThunk(dispatch: Dispatch) {
+    const response = await fetchRequest(`/${id}`, {
       method: 'PATCH',
       headers: { 'content-Type': 'application/json' },
       body: JSON.stringify({ name: text })
     });
-    console.log(response);
-    dispatch({
-      type: 'tournaments/editTournament',
-      payload: { id: id, response }
-    });
+    dispatch(editTournamentAction(response, id));
   };
 }
 
 export function deleteTournament(id: string) {
-  return async function deleteTournamentThunk(dispatch: any, getState: any) {
-    const response = await fetchRequest(id, {
+  return async function deleteTournamentThunk(dispatch: Dispatch) {
+    await fetchRequest(`/${id}`, {
       method: 'DELETE'
     });
-    console.log(response);
-    dispatch({
-      type: 'tournaments/deleteTournament',
-      payload: { id: id, response }
-    });
+    dispatch(deleteTournamentAction(id));
   };
 }

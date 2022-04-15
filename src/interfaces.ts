@@ -7,6 +7,10 @@ export interface ITournament {
   startDate: string;
 }
 
+export interface ITournamentState {
+  data: ITournament[];
+  error: boolean;
+}
 interface IParticipants {
   current: number;
   max: number;
@@ -18,7 +22,7 @@ export interface IAction {
 }
 
 export interface IState {
-  tournaments: ITournament[];
+  tournaments: ITournamentState;
 }
 
 interface Payload {

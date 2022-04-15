@@ -2,55 +2,87 @@ import React, { useState, useEffect } from 'react';
 import Button from './components/Button';
 import Input from './components/Input';
 import Container from './components/Container';
-import { ITournament, IState } from './interfaces';
 import TournamentItems from './tournamentItem';
 import { useDispatch, useSelector } from 'react-redux';
-
-import { fetchTournaments, postTournament } from './reducers/tournaments';
-//import store from './store'
+import {
+  fetchTournaments,
+  postTournament,
+  searchTournaments
+} from './reducers/tournaments';
+import { useDebouncedCallback } from 'beautiful-react-hooks';
+import { selectError, selectTournaments } from './selectors/tournaments';
 
 function Tournaments() {
-  const [searchInput, setSearchInput] = useState('');
+  const tournaments = useSelector(selectTournaments);
+  const error = useSelector(selectError);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const dispatch = useDispatch();
 
-  function handleClick(): void {
+  const handleClick = (): void => {
     const tournamentName = prompt('Tournament Name:');
     console.log(tournamentName);
     if (tournamentName) {
       const postNewTournament = postTournament(tournamentName);
       dispatch(postNewTournament);
     }
-  }
-
-  useEffect(() => {
-    dispatch(fetchTournaments);
-  }, []);
-
-  //functions for search
-  const setSearchValue = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    setSearchInput(event.target.value);
   };
 
-  const selectTournaments = (state: IState) => state.tournaments;
-  const tournaments = useSelector(selectTournaments);
+  const getTournaments = async (): Promise<void> => {
+    await dispatch(fetchTournaments);
+    setIsLoading(false);
+  };
 
-  const searchList: ITournament[] =
-    tournaments &&
-    tournaments.filter(tournament =>
-      tournament.name.toLowerCase().includes(searchInput.toLocaleLowerCase())
-    );
+  const tournamentItems = (): JSX.Element => {
+    if (tournaments && tournaments.length >= 1) {
+      const items = tournaments.map(tournament => {
+        return <TournamentItems key={tournament.id} tournament={tournament} />;
+      });
+      return <div className="tournament-grid">{items}</div>;
+    } else {
+      return <p className="alt-text">No tournaments found.</p>;
+    }
+  };
 
-  const tournamentItems = searchList.map(tournament => {
-    return <TournamentItems key={tournament.id} tournament={tournament} />;
-  });
+  const renderTournaments = (): JSX.Element => {
+    console.log('error', error);
+    if (isLoading && !error) {
+      return <p className="alt-text">Loading tournaments ...</p>;
+    } else if (!isLoading && !error) {
+      return tournamentItems();
+    } else {
+      return (
+        <>
+          <p className="alt-text">Something went wrong</p>
+          <Button onClick={getTournaments}>RETRY</Button>
+        </>
+      );
+    }
+  };
+
+  const onSearch = useDebouncedCallback(
+    async (search: string): Promise<void> => {
+      setIsLoading(true);
+      await dispatch(searchTournaments(search));
+      setIsLoading(false);
+    },
+    [dispatch, searchTournaments],
+    300
+  );
+
+  useEffect(() => {
+    getTournaments();
+  }, []);
 
   return (
     <Container>
       <div className="input-search">
-        <Input placeholder="Search tournament..." onChange={setSearchValue} />
+        <Input
+          placeholder="Search tournament..."
+          onChange={e => onSearch(e.target.value)}
+        />
         <Button onClick={handleClick}>CREATE TOURNAMENT</Button>
       </div>
-      <div className="tournament-grid">{tournamentItems}</div>
+      {renderTournaments()}
     </Container>
   );
 }

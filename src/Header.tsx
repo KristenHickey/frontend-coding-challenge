@@ -5,11 +5,9 @@ import './styles.css';
 
 const Header: React.FC = () => {
   return (
-    <>
-      <Container>
-        <H4>FACEIT Tournaments</H4>
-      </Container>
-    </>
+    <Container>
+      <H4>FACEIT Tournaments</H4>
+    </Container>
   );
 };
 

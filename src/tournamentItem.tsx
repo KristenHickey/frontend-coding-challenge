@@ -2,9 +2,9 @@ import React from 'react';
 import H6 from './components/H6';
 import Button from './components/Button';
 import './styles.css';
-import { ITournament, IState } from './interfaces';
+import { ITournament } from './interfaces';
 import { editTournament, deleteTournament } from './reducers/tournaments';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 type TournamentItemsProps = {
   tournament: ITournament;
@@ -12,17 +12,20 @@ type TournamentItemsProps = {
 
 const TournamentItems: React.FC<TournamentItemsProps> = ({ tournament }) => {
   const dispatch = useDispatch();
-  const date = new Date(tournament.startDate).toLocaleDateString('en-gb', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-  });
+  const date: string = new Date(tournament.startDate).toLocaleDateString(
+    'en-gb',
+    {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric'
+    }
+  );
 
-  function handleEdit(): void {
-    const tournamentName = prompt('New Tournament Name:');
+  const handleEdit = (): void => {
+    const tournamentName: string | null = prompt('New Tournament Name:');
     if (tournamentName) {
       const updateTournamentName = editTournament(
         tournamentName,
@@ -30,17 +33,17 @@ const TournamentItems: React.FC<TournamentItemsProps> = ({ tournament }) => {
       );
       dispatch(updateTournamentName);
     }
-  }
+  };
 
-  function handleDelete(): void {
-    const confirmDelete = window.confirm(
+  const handleDelete = (): void => {
+    const confirmDelete: boolean = window.confirm(
       'Do you really want to delete this tournament?'
     );
     if (confirmDelete) {
       const deleteTournamentFunction = deleteTournament(tournament.id);
       dispatch(deleteTournamentFunction);
     }
-  }
+  };
 
   return (
     <div className="tournamentItem">
