@@ -7,7 +7,7 @@ import {
   postTournamentAction
 } from '../actions/tournaments';
 import { API_TOURNAMENTS_URL } from '../constants/api';
-import { ITournamentState, IAction } from '../interfaces';
+import { ITournamentState, IAction, IOptions } from '../interfaces';
 
 const initialState: ITournamentState = { data: [], error: false };
 
@@ -67,7 +67,7 @@ export default function tournaments(
   }
 }
 
-const fetchRequest = (endPoint: string, options?: any) => {
+const fetchRequest = (endPoint: string, options?: IOptions) => {
   return fetch(API_TOURNAMENTS_URL + endPoint, options)
     .then(res => (res.status < 400 ? res : Promise.reject()))
     .then(res => (res.status !== 204 ? res.json() : res));
@@ -94,7 +94,7 @@ export function searchTournaments(query: string) {
 }
 
 export function postTournament(text: string) {
-  return async function postTournamentThunk(dispatch: Dispatch, getState: any) {
+  return async function postTournamentThunk(dispatch: Dispatch) {
     const response = await fetchRequest('', {
       method: 'POST',
       headers: { 'content-Type': 'application/json' },

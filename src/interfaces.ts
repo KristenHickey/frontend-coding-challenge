@@ -29,3 +29,11 @@ interface Payload {
   response: ITournament[] | ITournament;
   id?: string;
 }
+
+export interface IOptions {
+  method: string;
+  headers?: {
+    'content-Type': string;
+  };
+  body?: string;
+}
