@@ -53,7 +53,7 @@ function Tournaments() {
         <Input placeholder="Search tournament..." />
         <Button onClick={handleClick}>CREATE TOURNAMENT</Button>
       </div>
-      {tournamentItems}
+      <div className="tournament-grid">{tournamentItems}</div>
     </Container>
   );
 }

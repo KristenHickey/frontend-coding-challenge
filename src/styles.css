@@ -4,9 +4,7 @@
 }
 
 .tournamentItem {
-  width: 30%;
   padding: 20px;
-  margin-top: 24px;
   border-radius: 4px;
   background-color: #1f1f1f;
   line-height: 4px;
@@ -18,4 +16,11 @@
 
 .deleteButton {
   margin-left: 4px;
+}
+
+.tournament-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0px 24px 0px;
 }
