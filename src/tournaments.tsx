@@ -20,7 +20,6 @@ function Tournaments() {
 
   const handleClick = (): void => {
     const tournamentName = prompt('Tournament Name:');
-    console.log(tournamentName);
     if (tournamentName) {
       const postNewTournament = postTournament(tournamentName);
       dispatch(postNewTournament);
@@ -44,7 +43,6 @@ function Tournaments() {
   };
 
   const renderTournaments = (): JSX.Element => {
-    console.log('error', error);
     if (isLoading && !error) {
       return <p className="alt-text">Loading tournaments ...</p>;
     } else if (!isLoading && !error) {
